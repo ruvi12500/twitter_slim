@@ -6,7 +6,7 @@
 <body>
 <form>
 
-<a href="tweet.php">戻る</a>
+<a href="tweet">戻る</a>
 </form>
 </body>
 </html>

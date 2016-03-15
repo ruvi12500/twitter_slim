@@ -11,26 +11,21 @@ class Tweet
 
     public function setTweet($tweet)
     {
-        $this->tweet = (string)filter_var($tweet);
+        $this->tweet = $tweet;
+        return $this;
     }
+
     public function getTweet()
     {
         return $this->tweet;
     }
 
-    public function setTweetBtn($tweetbtn)
-    {
-        $this->tweetbtn = $tweetbtn;
-    }
-    public function getTweetBtn()
-    {
-        return $this->tweetbtn;
-    }
-
     public function setTweetDelete($deletebtn)
     {
         $this->deletebtn = $deletebtn;
+        return $this;
     }
+
     public function getTweetDelete()
     {
         return $this->deletebtn;
@@ -38,11 +33,24 @@ class Tweet
 
     public function setTweetFavorite($tweet_id)
     {
-        $this->tweet_id = (string)filter_var($tweet_id);
+        $this->tweet_id = $tweet_id;
+        return $this;
     }
+
     public function getTweetFavorite()
     {
         return $this->tweet_id;
+    }
+
+    public function setTweetButton($TweetButton)
+    {
+        $this->TweetButton = $TweetButton;
+        return $this;
+    }
+
+    public function getTweetButton()
+    {
+        return $this->TweetButton;
     }
 
     public function tweet_list()
@@ -55,27 +63,23 @@ class Tweet
             echo $e->getMessage();
         }
         $query =
-        "SELECT * FROM tweets join users
-        on tweets.user_id = users.user_id ORDER BY tweets.created_at desc";
+        "SELECT tweets.*,users.user_name FROM tweets
+        join users on tweets.user_id = users.user_id
+        ORDER BY tweets.created_at desc";
         if ($result = $db->query($query)) {
             while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
-                if ($row['delete_flag'] == $Tweeted) { ?>
-                    <tr><td>
-                    <?= $row['body'] ?>
-                    <?= $row['created_at'] ?>
-                    <?= $row['user_name'] ?>
-                    <a href="tweet.php?id=<?= $row['tweet_id'] ?> ">削除</a>
-                    <a href="update.php?id=<?= $row['tweet_id'] ?> ">編集</a>
-                    <a href="tweet.php?tweet_id=<?= $row['tweet_id'] ?> ">お気に入り</a>
-                    </td></tr>
-                <? }
+                if ($row['delete_flag'] == $Tweeted) {
+                    $array[] = $row;
+                }
             }
         }
+        return $array;
     }
 
-    public function tweet_add($tweet,$tweetbtn)
+    public function insert()
     {
-        if (isset($tweet) && isset($tweetbtn)) {
+        $TweetButton = $this->getTweetButton();
+        if(isset($TweetButton)){
             $connect_db = new Database();
             try {
                 $db = $connect_db->connect_db();
@@ -85,19 +89,21 @@ class Tweet
             if (!isset($_SESSION)) {
                 session_start();
             }
-
             $Tweeted = 0;
             $insert = $db->prepare(
                 "insert into tweets
                 (user_id,body,delete_flag)
                 VALUE(?,?,?)"
             );
-            $insert->execute(array($_SESSION['user_id'],$tweet,$Tweeted));
+            $insert->execute(array($_SESSION['user_id'],$this->getTweet(),$Tweeted));
+            $status = ('tweeted');
+            return $status;
         }
     }
 
-    public function tweet_delete($tweet_id)
+    public function tweet_delete()
     {
+        $tweet_id = $this ->getTweetDelete();
         if (isset($tweet_id)) {
             $connect_db = new Database();
             try {
@@ -111,9 +117,11 @@ class Tweet
             );
             $delete->execute(array($tweet_id));
         }
+        return $this;
     }
 
-    public function tweet_favorite($tweet_id){
+    public function tweet_favorite(){
+        $tweet_id = $this->getTweetFavorite();
         $connect_db = new Database();
         try {
             $db= $connect_db->connect_db();

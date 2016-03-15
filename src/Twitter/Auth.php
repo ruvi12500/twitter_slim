@@ -2,7 +2,7 @@
 
 namespace Twitter;
 
-class Login
+class Auth
 {
     private $mailaddress = null;
     private $password = null;
@@ -10,8 +10,10 @@ class Login
 
     public function setMailAddress($mailaddress)
     {
-        $this->mailaddress = (string)filter_var($mailaddress);
+        $this->mailaddress = $mailaddress;
+        return $this;
     }
+
     public function getMailAddress()
     {
         return $this->mailaddress;
@@ -19,8 +21,10 @@ class Login
 
     public function setPassWord($password)
     {
-        $this->password = (string)filter_var($password);
+        $this->password = $password;
+        return $this;
     }
+
     public function getPassWord()
     {
         return $this->password;
@@ -28,15 +32,19 @@ class Login
 
     public function setStatus($status)
     {
-        $this->status = (string)filter_var($status);
+        $this->status = $status;
+        return $this;
     }
+
     public function getStatus()
     {
         return $this->status;
     }
 
-    public function login_check($mailaddress,$password)
+    public function login_check()
     {
+        $mailaddress = $this->getMailAddress();
+        $password = $this->getPassWord();
         $connect_db = new Database();
         try {
             $db = $connect_db->connect_db();
@@ -60,7 +68,7 @@ class Login
 
             if ($stmt->rowCount() == 1) {
                 $_SESSION['user_id'] = $result['user_id'];
-                header('Location:http://local-twitter-slim.jp/tweet.php');
+                $this->setStatus('login');
             } else {
                 $this->setStatus('failed');
             }

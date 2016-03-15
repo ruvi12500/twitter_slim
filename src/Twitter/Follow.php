@@ -14,10 +14,10 @@ class Follow
         }
        $stmt = $db->prepare('SELECT * FROM users');
         $stmt->execute();
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) { ?>
-            <?= $row['user_name']; ?>
-            <a href="follow_user_list.php">フォローする</a>
-        <? }
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $follows[] = $row;
+        }
+        return $follows;
     }
 
     public function follow_insert()

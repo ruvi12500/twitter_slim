@@ -10,7 +10,7 @@
 <input type="submit" name="updatebtn" value = "確定">
 <input type="hidden" name="id" value="<?= $_GET['id']; ?>" >
 <br>
-<a href="tweet.php">戻る</a>
+<a href="tweet">戻る</a>
 </form>
 </body>
 </html>

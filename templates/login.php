@@ -7,9 +7,7 @@
 <body>
     <h1>ログインページ</h1>
     <? if ($status == "logged_in") { ?>
-        <p><a href="tweet.php">ログイン済みです。</a></p>
-    <? } elseif ($status == "login") { ?>
-        <p><a href="tweet.php">ログインに成功しました。</a></p>
+        <p><a href="tweet">ログイン済みです。</a></p>
     <? } elseif ($status == "failed") { ?>
         <p>メールアドレスもしくはパスワードが違います。</p>
     <? } else { ?>

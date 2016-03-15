@@ -5,10 +5,10 @@
     <title>Twitter Login</title>
 </head>
 <body>
-<form action="login.php" method="post">
+<form action="login" method="post">
 <input type="submit" value="ログインする">
 </form>
-<form action="registration.php" method="post">
+<form action="registration" method="post">
 <input type="submit" value="新規登録">
 
 </form>

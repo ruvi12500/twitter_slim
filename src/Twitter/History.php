@@ -22,16 +22,9 @@ class History
             WHERE user_id = ?'
         );
         $stmt->execute(array($_SESSION['user_id']));
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) { ?>
-                <tr><td>
-                    ツイート:
-                    <?= $row["body"]; ?>
-                    日時：
-                    <?= $row["created_at"]; ?>
-                    <? if($row["delete_flag"] == 1) { ?>
-                        削除されています。
-                    <? } ?><br>
-                </td></tr>
-        <? }
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $history[] = $row;
+        }
+        return $history;
     }
 }
