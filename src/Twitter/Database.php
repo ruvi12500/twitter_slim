@@ -4,25 +4,18 @@ namespace Twitter;
 
 class Database
 {
-    private $host = 'localhost';
-    private $db_user = 'takumi_asai';
-    private $db_pass = 'asataku';
-    private $use_db = 'twitter';
+    private $dbhost="localhost";
+    private $dbuser="takumi_asai";
+    private $dbpass="asataku";
+    private $dbname="twitter";
 
     public function connect_db()
     {
-        $mysqli = new mysqli(
-            $this->host,
-            $this->db_user,
-            $this->db_pass,
-            $this->use_db
+        $db_connection = new \PDO(
+            "mysql:host=$this->dbhost;dbname=$this->dbname",
+            $this->dbuser,
+            $this->dbpass
         );
-        if ($mysqli->connect_error) {
-            die('Connect Error (' . $mysqli->connect_errno . ') '
-            . $mysqli->connect_error
-            );
-        }
-        return $mysqli;
+        return $db_connection;
     }
-
 }

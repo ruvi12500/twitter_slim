@@ -5,19 +5,12 @@
     <title>Twitter Login</title>
 </head>
 <body>
-    <h1>ログインページ</h1>
-    <? if ($login_class->getStatus() == "logged_in") { ?>
-        <p><a href="tweet.php">ログイン済みです。</a></p>
-    <? } elseif ($login_class->getStatus() == "login") { ?>
-        <p><a href="tweet.php">ログインに成功しました。</a></p>
-    <? } elseif ($login_class->getStatus() == "failed") { ?>
-        <p>メールアドレスもしくはパスワードが違います。</p>
-    <? } else { ?>
-        <form action="" method="POST">
-        MAILADDRESS:<input type="text" name="mailaddress"><br>
-        PASSWORD:<input type="password" name="password"><br>
-        <input type="submit" value="ログイン">
-    </form>
-    <? } ?>
+<form action="login.php" method="post">
+<input type="submit" value="ログインする">
+</form>
+<form action="registration.php" method="post">
+<input type="submit" value="新規登録">
+
+</form>
 </body>
 </html>

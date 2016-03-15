@@ -2,11 +2,12 @@
 
 namespace Twitter;
 
-class Twitter
+class Tweet
 {
     private $tweet = null;
     private $tweetbtn = null;
     private $deletebtn = null;
+    private $tweet_id = null;
 
     public function setTweet($tweet)
     {
@@ -35,39 +36,63 @@ class Twitter
         return $this->deletebtn;
     }
 
+    public function setTweetFavorite($tweet_id)
+    {
+        $this->tweet_id = (string)filter_var($tweet_id);
+    }
+    public function getTweetFavorite()
+    {
+        return $this->tweet_id;
+    }
+
     public function tweet_list()
     {
         $Tweeted = 0;
         $connect_db = new Database();
-        $mysqli = $connect_db->connect_db();
-        $query = "SELECT * FROM tweet ORDER BY TweetDate desc";
-        if ($result = $mysqli->query($query)) {
-            while ($row = $result->fetch_assoc()) {
-                if ($row['DeleteFlg'] == $Tweeted) { ?>
+        try {
+            $db= $connect_db->connect_db();
+        } catch(PDOException $e) {
+            echo $e->getMessage();
+        }
+        $query =
+        "SELECT * FROM tweets join users
+        on tweets.user_id = users.user_id ORDER BY tweets.created_at desc";
+        if ($result = $db->query($query)) {
+            while ($row = $result->fetch(\PDO::FETCH_ASSOC)) {
+                if ($row['delete_flag'] == $Tweeted) { ?>
                     <tr><td>
-                    <?= $row['Tweet'] ?>
-                    <?= $row['TweetDate'] ?>
-                    <a href="tweet.php?id=<?= $row['ID'] ?> ">削除</a>
-                    <a href="update.php?id=<?= $row['ID'] ?> ">編集</a>
+                    <?= $row['body'] ?>
+                    <?= $row['created_at'] ?>
+                    <?= $row['user_name'] ?>
+                    <a href="tweet.php?id=<?= $row['tweet_id'] ?> ">削除</a>
+                    <a href="update.php?id=<?= $row['tweet_id'] ?> ">編集</a>
+                    <a href="tweet.php?tweet_id=<?= $row['tweet_id'] ?> ">お気に入り</a>
                     </td></tr>
                 <? }
             }
         }
     }
 
-    public function tweet_post($tweet,$tweetbtn)
+    public function tweet_add($tweet,$tweetbtn)
     {
         if (isset($tweet) && isset($tweetbtn)) {
             $connect_db = new Database();
-            $mysqli = $connect_db->connect_db();
-            $today = date("Y-m-d H:i:s");
-            $insert = $mysqli->prepare(
-                "insert into tweet
-                (Tweet,User,TweetDate,DeleteFlg)
-                VALUE(?,?,?,0)"
+            try {
+                $db = $connect_db->connect_db();
+            } catch(PDOException $e) {
+                echo $e->getMessage();
+            }
+            if (!isset($_SESSION)) {
+                session_start();
+            }
+
+            $Tweeted = 0;
+            $insert = $db->prepare(
+                "insert into tweets
+                (user_id,body,delete_flag)
+                VALUE(?,?,?)"
             );
-            $insert->bind_param('sss',$tweet,$_SESSION["mailaddress"],$today);
-            $insert->execute();
+            $insert->execute(array($_SESSION['user_id'],$tweet,$Tweeted));
         }
     }
 
@@ -75,26 +100,34 @@ class Twitter
     {
         if (isset($tweet_id)) {
             $connect_db = new Database();
-            $mysqli = $connect_db->connect_db();
+            try {
+                $db= $connect_db->connect_db();
+            } catch(PDOException $e) {
+                echo $e->getMessage();
+            }
             $Deleted = 1;
-            $delete = $mysqli->prepare(
-                "update tweet set DeleteFlg = $Deleted WHERE ID = ?"
+            $delete = $db->prepare(
+                "update tweets set delete_flag = $Deleted WHERE tweet_id = ?"
             );
-            $delete->bind_param('i', $tweet_id);
-            $delete->execute();
+            $delete->execute(array($tweet_id));
         }
     }
+
+    public function tweet_favorite($tweet_id){
+        $connect_db = new Database();
+        try {
+            $db= $connect_db->connect_db();
+        } catch(PDOException $e) {
+            echo $e->getMessage();
+        }
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+        $insert = $db->prepare(
+            "insert into favorites
+            (user_id,tweet_id)
+            VALUE(?,?)"
+        );
+        $insert->execute(array($_SESSION['user_id'],$tweet_id));
+    }
 }
-
-$tweet_class = new Twitter();
-
-if (isset($_POST['tweet']) && isset($_POST['tweetbtn'])) {
-    $tweet_class->setTweet($_POST['tweet']);
-    $tweet_class->setTweetBtn($_POST['tweetbtn']);
-}
-
-if (isset($_GET['id'])) {
-    $tweet_class->setTweetDelete($_GET['id']);
-}
-
-//include 'tweet.php';

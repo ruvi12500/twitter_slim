@@ -5,10 +5,10 @@
 </head>
 <body>
 
-<form action="" method="POST">
+<form action="" method="get">
 <input type="text" name="update">
 <input type="submit" name="updatebtn" value = "確定">
-<? $update_class->tweet_update($update_class->getTweetUpdate(),$update_class->getTweetId()); ?>
+<input type="hidden" name="id" value="<?= $_GET['id']; ?>" >
 <br>
 <a href="tweet.php">戻る</a>
 </form>

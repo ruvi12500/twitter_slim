@@ -38,36 +38,32 @@ class Login
     public function login_check($mailaddress,$password)
     {
         $connect_db = new Database();
-        $mysqli = $connect_db->connect_db();
-        session_start();
-        if (isset($_SESSION["mailaddress"])) {
+        try {
+            $db = $connect_db->connect_db();
+        } catch(PDOException $e) {
+            echo $e->getMessage();
+        }
+
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+
+        if (isset($_SESSION["user_id"])) {
             $this->setStatus('logged_in');
         } elseif (!empty($mailaddress) OR !empty($password)) {
-            $stmt = $mysqli->prepare(
-                "SELECT * FROM user WHERE MailAddress = ? AND PassWord = ?"
+            $stmt = $db->prepare(
+                "SELECT * FROM users WHERE mail_address = ? AND user_password = ?"
             );
+            $stmt->execute(array($mailaddress,$password));
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $stmt->fetchAll();
 
-            $stmt->bind_param('ss',$mailaddress,$password);
-            $stmt->execute();
-            $stmt->store_result();
-
-            if ($stmt->num_rows == 1) {
-                $this->setStatus('login');
-                $_SESSION["mailaddress"] = $mailaddress;
+            if ($stmt->rowCount() == 1) {
+                $_SESSION['user_id'] = $result['user_id'];
+                header('Location:http://local-twitter-slim.jp/tweet.php');
             } else {
                 $this->setStatus('failed');
             }
         }
     }
 }
-
-$login_class = new Login();
-
-if (isset($_POST['mailaddress']) && isset($_POST['password'])) {
-    $login_class->setMailAddress($_POST['mailaddress']);
-    $login_class->setPassWord($_POST['password']);
-}
-
-$login_class->login_check($login_class->getMailAddress(),$login_class->getPassWord());
-
-include 'index.php';

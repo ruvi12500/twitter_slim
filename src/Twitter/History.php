@@ -1,47 +1,37 @@
 <?
+
+namespace Twitter;
+
 class History
 {
-    private $host = 'localhost';
-    private $db_user = 'takumi_asai';
-    private $db_pass = 'asataku';
-    private $use_db = 'twitter';
-
-    public function connect_db()
+    public function tweet_history()
     {
-        $mysqli = new mysqli(
-            $this->host,
-            $this->db_user,
-            $this->db_pass,
-            $this->use_db
+        $connect_db = new Database();
+        try {
+            $db = $connect_db->connect_db();
+        } catch(PDOException $e) {
+            echo $e->getMessage();
+        }
+
+        if (!isset($_SESSION)) {
+            session_start();
+        }
+
+        $stmt = $db->prepare(
+            'SELECT * FROM tweets
+            WHERE user_id = ?'
         );
-            if ($mysqli->connect_error) {
-                die('Connect Error (' . $mysqli->connect_errno . ') '
-                . $mysqli->connect_error
-                );
-            }
-        return $mysqli;
-    }
-
-    public function tweet_list()
-    {
-        $mysqli = $this->connect_db();
-        $query = "SELECT * FROM tweet ORDER BY TweetDate desc;";
-        if ($result = $mysqli->query($query)) {
-            while ($row = $result->fetch_assoc()) { ?>
+        $stmt->execute(array($_SESSION['user_id']));
+            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) { ?>
                 <tr><td>
                     ツイート:
-                    <?= $row["Tweet"]; ?>
+                    <?= $row["body"]; ?>
                     日時：
-                    <?= $row["TweetDate"]; ?>
-                    <? if($row["DeleteFlg"] == 1) { ?>
+                    <?= $row["created_at"]; ?>
+                    <? if($row["delete_flag"] == 1) { ?>
                         削除されています。
-                    <? } ?>
+                    <? } ?><br>
                 </td></tr>
         <? }
-        }
     }
 }
-
-$history_class = new History();
-
-include 'history_templates.php';

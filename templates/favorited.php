@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Twitter履歴</title>
+    <title></title>
 </head>
 <body>
-<form action="" method="POST">
-<table>
+<form>
+
 <a href="tweet.php">戻る</a>
 </form>
-</table>
-
 </body>
 </html>
