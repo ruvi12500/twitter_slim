@@ -2,13 +2,13 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>Twitter Login</title>
+    <title>Twitter</title>
 </head>
 <body>
 <form action="login" method="post">
 <input type="submit" value="ログインする">
 </form>
-<form action="registration" method="post">
+<form action="regist" method="post">
 <input type="submit" value="新規登録">
 
 </form>

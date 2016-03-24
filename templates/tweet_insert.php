@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <meta charset="UTF-8" />
+    <title>ツイート</title>
 </head>
 <body>
-<form action="" method="post">
-    <input type="text" name="tweet">
+<form action="" method="post" enctype="multipart/form-data">
+    <input type="text" name="tweet"><br>
+    <input type="file" name="image">
     <input type="submit" name="TweetButton" value="ツイートする">
 </form>
+<br>
+<a href="/tweet">戻る</a>
 </body>
 </html>

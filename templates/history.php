@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8" />
     <title>Twitter履歴</title>
 </head>
 <body>
 <form action="" method="POST">
 <table>
-<? foreach ($history as $list) { ?>
-    <tr><td>
-    <?= $list['body'] ?>
-    <?= $list['created_at'] ?>
-    <? if($list["delete_flag"] == 1) { ?>
-        削除されています。
+<? if(!empty($history)){ ?>
+    <? foreach ($history as $list) { ?>
+        <tr><td>
+        <?= htmlspecialchars($list['body'],ENT_QUOTES) ?>
+        <?= $list['created_at'] ?>
+        <? if($list["delete_flag"] == 1) { ?>
+            削除されています。
+        <? } ?>
+        </td></tr>
     <? } ?>
-    </td></tr>
 <? } ?>
 </form>
 </table>

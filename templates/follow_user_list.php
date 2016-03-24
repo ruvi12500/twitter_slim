@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <meta charset="UTF-8" />
+    <title>フォロー</title>
 </head>
 <body>
-<? foreach ($follows as $f) { ?>
-        <?= $f['user_name']; ?>
-        <a href="follow_user_list">フォローする</a>
+<table>
+<? if(!empty($follows)){ ?>
+    <? foreach ($follows as $f) { ?>
+            <tr><td>
+            <?= htmlspecialchars($f['user_name'],ENT_QUOTES) ?>
+            </td></tr>
+    <? } ?>
 <? } ?>
+</table>
+<a href="/tweet">戻る</a>
 </body>
 </html>

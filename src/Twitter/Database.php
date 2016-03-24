@@ -11,11 +11,15 @@ class Database
 
     public function connect_db()
     {
-        $db_connection = new \PDO(
-            "mysql:host=$this->dbhost;dbname=$this->dbname",
-            $this->dbuser,
-            $this->dbpass
-        );
+        try{
+            $db_connection = new \PDO(
+                "mysql:host=$this->dbhost;dbname=$this->dbname",
+                $this->dbuser,
+                $this->dbpass
+            );
+        }catch(PDOException $e){
+            $e->getMessage();
+        }
         return $db_connection;
     }
 }

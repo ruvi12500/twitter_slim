@@ -4,6 +4,11 @@
     $app = new \Slim\Slim();
 
     $app->get('/', function () use ($app) {
+        $AuthClass = new Twitter\AuthCheck();
+        $status = $AuthClass->LoginCheck();
+        if ($status == 'login') {
+            $app->redirect('tweet');
+        }
         $app->render('index.php');
     });
 
@@ -14,114 +19,172 @@
         $LoginClass
             ->setMailAddress($mailaddress)
             ->setPassWord($password)
-            ->login_check();
+            ->Login();
         $status = $LoginClass->getStatus();
-        if ($status == 'login') {
+        if ($status == 'login' OR $status == 'logged_in') {
             $app->redirect('/tweet');
         }
-        $app->render('login.php',array('status'=>$status));
-
+        $app->render('login.php',array('status' => $status));
     });
 
     $app->post('/logout', function () use ($app) {
-        (new Twitter\Logout)->logout();
+        (new Twitter\Auth)->logout();
         $app->redirect('/');
     });
 
     $app->get('/tweet', function () use ($app) {
         $TweetClass = new Twitter\Tweet();
-        /*
-        if (isset($_GET['id'])) {
-            $TweetClass->setTweetDelete($_GET['id']);
+        $status = $TweetClass->LoginCheck();
+        if ($status == 'failed') {
+            $app->redirect('/');
         }
-
-        if (isset($_GET['tweet_id'])) {
-            $TweetClass->setTweetFavorite($_GET['tweet_id']);
-        }
-        */
-
-        $delete_id = $app->request->Get('id');
-        $favorite_id = $app->request->Get('tweet_id');
+        $FavoriteId = $app->request->Get('tweet_id');
+        $ReTweetId = $app->request->Get('retweet_id');
         $TweetClass
-            ->setTweetDelete($delete_id)
-            ->setTweetFavorite($favorite_id)
-            ->tweet_delete()
-            ->tweet_favorite();
-        $tweet_list = $TweetClass->tweet_list();
-
-        $app->render('tweet.php',array('tweet_list'=>$tweet_list));
+            ->setTweetFavoriteId($FavoriteId)
+            ->setReTweetId($ReTweetId)
+            ->Favorite()
+            ->Retweet();
+        $Display = $TweetClass->Display();
+        $app->render('tweet.php',array('Display' => $Display));
     });
 
     $app->post('/tweet/insert', function () use ($app) {
         $TweetClass = new Twitter\Tweet();
+        $ImagesClass = new Twitter\Images();
+        $status = $TweetClass->LoginCheck();
+        if ($status == 'failed') {
+            $app->redirect('/');
+        }
         $tweet = $app->request->Post('tweet');
+        $image = $app->request->Post('image');
         $TweetButton = $app->request->Post('TweetButton');
         $TweetClass
-            ->setTweet($tweet)
-            ->setTweetButton($TweetButton);
-        $status = $TweetClass->insert();
+            -> setTweet($tweet)
+            -> setTweetButton($TweetButton);
+        (new Twitter\Images)
+            -> setImage($image)
+            -> Insert();
+        $Tweeted = $TweetClass->Insert();
         $app->render('tweet_insert.php');
-        if($status == 'tweeted'){
+        if($Tweeted == 'tweeted'){
             $app->redirect('/tweet');
         }
     });
 
-    $app->get('/tweet/delete/', function () use ($app) {
+    $app->get('/tweet/delete/:tweet_id', function ($tweet_id) use ($app) {
+        $TweetClass = new Twitter\Tweet();
+        $status = $TweetClass->LoginCheck();
+        if ($status == 'failed') {
+            $app->redirect('/');
+        }
+        $TweetClass
+            ->setTweetDeleteId($tweet_id)
+            ->Delete();
+        $app->redirect('/tweet');
     });
+
     $app->post('/history', function () use ($app) {
-        $HistoryClass = new Twitter\History();
-        $history = $HistoryClass->tweet_history();
-        $app->render('history.php',array('history'=>$history));
+        $HistoryClass = new Twitter\Tweet();
+        $status = $HistoryClass->LoginCheck();
+        if ($status == 'failed') {
+            $app->redirect('/');
+        }
+        $history = $HistoryClass->History();
+        $app->render('history.php',array('history' => $history));
     });
 
-    $app->get('/update', function () use ($app) {
-        $update_class = new Twitter\Update();
-
-        if (isset($_GET['update']) && isset($_GET['updatebtn'])) {
-            $update_class->setTweetUpdate($_GET['update']);
-            $update_class->setTweetId($_GET['id']);
-        }
-
-        $update_class->tweet_put (
-            $update_class->getTweetUpdate(),
-            $update_class->getTweetId()
-        );
-
-        $app->render('update.php') ;
+    $app->get('/update/:tweet_id', function ($tweet_id) use ($app) {
+        $app->render('update.php');
     });
 
-    $app->post('/registration', function () use ($app) {
-        $registration_class = new Twitter\Registration();
-        if (isset($_POST['insert'])) {
-            $registration_class->setMailAddress($_POST['mail_address']);
-            $registration_class->setUserPassWord($_POST['user_password']);
-            $registration_class->setUserName($_POST['user_name']);
+    $app->post('/update/:tweet_id', function ($tweet_id) use ($app) {
+        $UpdateClass = new Twitter\Tweet();
+        $status = $TweetClass->LoginCheck();
+        if ($status == 'failed') {
+            $app->redirect('/');
         }
-        $registration_class->user_insert(
-            $registration_class->getMailAddress(),
-            $registration_class->getUserPassWord(),
-            $registration_class->getUserName()
-        );
+        $body = $app->request->Post('update');
+        $UpdateClass
+            ->setTweetUpdate($body)
+            ->setTweetUpdateId($tweet_id)
+            ->Update();
+            $app->redirect('/tweet');
+    });
 
-        $status = $registration_class->getStatus();
-        $app->render('registration.php',array('status'=>$status));
+    $app->post('/regist', function () use ($app) {
+        $RegistrationClass = new Twitter\Registration();
+        $MailAddress = $app->request->Post('mail_address');
+        $RegistrationClass
+            ->setMailAddress($MailAddress)
+            ->Regist();
+        $status = $RegistrationClass->getStatus();
+        $app->render('mail_form.php',array('status' => $status));
+    });
 
+    $app->get('/registration/:UniqId', function ($UniqId) use ($app) {
+            $status = null;
+            $app->render('registration.php',array('status' => $status));
+    });
+
+    $app->post('/registration/:UniqId', function ($UniqId) use ($app) {
+        $RegistrationClass = new Twitter\Registration();
+        $UserPassWord = $app->request->Post('user_password');
+        $UserName = $app->request->Post('user_name');
+        $RegistrationClass
+            ->setUserPassWord($UserPassWord)
+            ->setUserName($UserName)
+            ->setUniqId($UniqId)
+            ->UserInsert();
+        $status = $RegistrationClass->getStatus();
+        $app->render('registration.php',array('status' => $status));
     });
 
     $app->post('/favorited', function () use ($app) {
-        $favorites_class = new Twitter\Favorites();
-        $favorites_class->favorite_list();
-        $app->render('favorited.php');
+        $FavoritesClass = new Twitter\Favorites();
+        $favorites = $FavoritesClass->Display();
+        $app->render('favorited.php',array('favorites' => $favorites));
     });
 
+    $app->get('/favorited/delete/:FavoriteId', function ($FavoriteId) use ($app) {
+        $FavoritesClass = new Twitter\Favorites();
+        $FavoritesClass
+            ->setFavoriteDeleteId($FavoriteId)
+            ->Delete();
+        $app->redirect('/tweet');
+    });
 
+    $app->post('/serch', function () use ($app) {
+        $TweetClass = new Twitter\Tweet();
+        $status = $TweetClass->LoginCheck();
+        if ($status == 'failed') {
+            $app->redirect('/');
+        }
+        $TweetSerch = $app->request->Post('serch');
+        $TweetClass
+            ->setTweetSerch($TweetSerch);
+        $Serch = $TweetClass->Serch();
+        $app->render('serch.php',array('Serch' => $Serch));
+    });
 
-    $app->post('/follow_user_list', function () use ($app) {
-        $follow_class = new Twitter\Follow();
-        $follows = $follow_class->follow_list();
+    $app->post('/follow', function () use ($app) {
+        $FollowClass = new Twitter\Follow();
+        $follows = $FollowClass->FollowList();
         $app->render('follow_user_list.php',array('follows' => $follows));
     });
 
-    $app->run();
+    $app->post('/follower', function () use ($app) {
+        $FollowClass = new Twitter\Follow();
+        $follows = $FollowClass->FollowerList();
+        $app->render('follow_user_list.php',array('follows' => $follows));
+    });
 
-?>
+    $app->get('/follow/:id', function ($id) use ($app) {
+        $FollowClass = new Twitter\Follow();
+        $FollowClass
+            ->setFollowUserId($id)
+            ->Insert();
+        $app->redirect('/tweet');
+    });
+
+    $app->run();
