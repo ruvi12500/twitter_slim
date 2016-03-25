@@ -14,6 +14,13 @@
             <?= htmlspecialchars($list['user_name'],ENT_QUOTES) ?>
             <a href="/favorited/delete/<?= $list['tweet_id'] ?>">お気に入り解除</a>
             </td></tr>
+        <tr><td>
+        <? if(!empty($list['id'])){ ?>
+            <a href="/images/<?= $list['tweet_id'] ?>">
+                <img src="http://local-twitter-slim.jp/images/<?= $list['tweet_id'] ?>">
+            </a>
+        <? } ?>
+        </td></tr>
     <? } ?>
 <? } ?>
 </table>

@@ -64,22 +64,22 @@ class Registration
         return $this->status;
     }
 
-    public function Regist()
+    public function register()
     {
         $MailAddress = $this->getMailAddress();
-        if (!isset($_SESSION)) {
-            session_start();
-        }
         if($MailAddress != '') {
-        $connect_db = new Database();
-        $db = $connect_db->connect_db();
-        $stmt = $db->prepare(
-            "SELECT * FROM users WHERE mail_address = ?"
-        );
-        $stmt->execute(array($MailAddress));
+            $connect_db = new Database();
+            $db = $connect_db->connect_db();
+
+            $stmt = $db->prepare(
+                "SELECT * FROM users WHERE mail_address = ?"
+            );
+
+            $stmt->execute([$MailAddress]);
             $UniqUserId = uniqid(rand(100,999));
             $_SESSION['UniqUserId'] = $UniqUserId;
             $_SESSION['MailAddress'] = $MailAddress;
+
             if($stmt->rowCount() == 0){
                 $this->setStatus('ok');
                 mb_language("japanese");
@@ -96,33 +96,33 @@ class Registration
         }
     }
 
-    public function UserInsert()
+    public function userInsert()
     {
-        if (!isset($_SESSION)) {
-            session_start();
-        }
-        $salt = null;
+        $salt = '1e13081c8ea3c66c0181f0893e8c540d';
         $MailAddress = $_SESSION['MailAddress'];
         $UserPassWord = $this->getUserPassWord();
         $UserName = $this->getUserName();
         $UniqId = $this->getUniqId();
+
         if (
             $UniqId == $_SESSION['UniqUserId'] &&
             $UserPassWord != '' &&
             $UserName != ''
         ) {
-            $UserPassWordMd5 = md5($UserPassWord);
-            $query = array(
+            $UserPassWordMd5 = md5($UserPassWord . $salt);
+            $query = [
                 $_SESSION['MailAddress'],
                 $UserPassWordMd5,$UserName
-            );
+            ];
             $connect_db = new Database();
             $db = $connect_db->connect_db();
+
             $insert = $db->prepare(
                 "insert into users
                 (mail_address,user_password,user_name)
                 VALUE(?,?,?)"
             );
+
             if ($insert->execute($query)) {
                 $this->setStatus('ok');
             }

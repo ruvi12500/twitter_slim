@@ -41,25 +41,26 @@ class Auth
         return $this->status;
     }
 
-    public function Login()
+    public function login()
     {
+        $salt = '1e13081c8ea3c66c0181f0893e8c540d';
         $mailaddress = $this->getMailAddress();
         $password = $this->getPassWord();
         $connect_db = new Database();
         $db = $connect_db->connect_db();
-        if (!isset($_SESSION)) {
-            session_start();
-        }
+
         if (isset($_SESSION["user_id"])) {
             $this->setStatus('logged_in');
         } elseif (!empty($mailaddress) OR !empty($password)) {
-            $passwordMd5 = md5($password);
+            $passwordMd5 = md5($password . $salt);
+
             $stmt = $db->prepare(
                 "SELECT * FROM users WHERE mail_address = ? AND user_password = ?"
             );
-            $stmt->execute(array($mailaddress,$passwordMd5));
+            $stmt->execute([$mailaddress,$passwordMd5]);
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
             $stmt->fetchAll();
+
             if ($stmt->rowCount() == 1) {
                 $_SESSION['user_id'] = $result['user_id'];
                 $this->setStatus('login');
@@ -71,7 +72,6 @@ class Auth
 
     public function logout()
     {
-        session_start();
         session_destroy();
     }
 }

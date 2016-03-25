@@ -8,7 +8,7 @@
     <h1>ログインページ</h1>
     <? if ($status == "logged_in") { ?>
         <p><a href="tweet">ログイン済みです。</a></p>
-    <? } elseif ($status == "failed") { ?>
+    <? if ($status == "failed") { ?>
         <p>メールアドレスもしくはパスワードが違います。</p>
     <? } else { ?>
         <form action="" method="post">

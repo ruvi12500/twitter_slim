@@ -12,8 +12,16 @@
         <tr><td>
         <?= htmlspecialchars($list['body'],ENT_QUOTES) ?>
         <?= $list['created_at'] ?>
-        <? if($list["delete_flag"] == 1) { ?>
+        <? if ($list["delete_flag"] == 1) { ?>
             削除されています。
+        <? } ?>
+        </td></tr>
+
+        <tr><td>
+        <? if (!empty($list['id'])) { ?>
+            <a href="/images/<?= $list['tweet_id'] ?>">
+                <img src="/images/<?= $list['tweet_id'] ?>">
+            </a>
         <? } ?>
         </td></tr>
     <? } ?>

@@ -5,12 +5,30 @@
     <title>Twitter</title>
 </head>
 <body>
+<table>
+<tr>
 <form action="tweet/insert" method="post">
-    <input type="submit" value="ツイート"><br><br>
+    <td><input type="submit" value="ツイート"></td>
 </form>
-<form action="history" method="post">
-    <input type="submit" value="ツイート履歴">
+    <td><a href="history">ツイート履歴</a></td>
+</tr>
+<tr>
+        <td><a href="favorited">お気に入り一覧</a></td>
+    <form action="/search" method="post">
+        <td><input type="text" name="search">
+        <input type="submit" value="検索"></td>
+    </form>
+</tr>
+<tr>
+        <td><a href="follow">フォロー</a></td>
+        <td><a href="follower">フォロワー</a></td>
+</tr>
+<tr>
+<form action="logout" method="post">
+    <td><input type="submit" value="ログアウト"></td>
 </form>
+</tr>
+</table>
 <h1>ツイート一覧</h1>
 <table>
 <? if (!empty($Display))  { ?>
@@ -28,32 +46,17 @@
             <a href="tweet?retweet_id=<?= $t['tweet_id'] ?>">リツイート</a>
         <? } ?>
         </td></tr>
+        <tr><td>
+        <? if(!empty($t['id'])){ ?>
+            <a href = "images/<?= $t['tweet_id']?>">
+                <img src="http://local-twitter-slim.jp/images/<?= $t['tweet_id']?>" >
+            </a>
+        <? } ?>
+
+        </td></tr>
     <? } ?>
 <? } ?>
 </table>
-<table>
-<tr>
-    <form action="favorited" method="post">
-        <td><input type="submit" value="お気に入り一覧"></td>
-    </form>
-    <form action="/serch" method="post">
-        <td><input type="text" name="serch">
-        <input type="submit" value="検索"></td>
-    </form>
-</tr>
-<tr>
-    <form action="follow" method="post">
-        <td><input type="submit" value="フォロー"></td>
-    </form>
-    <form action="follower" method="post">
-        <td><input type="submit" value="フォロワー"></td>
-    </form>
-</tr>
-<tr>
-<form action="logout" method="post">
-    <td><input type="submit" value="ログアウト"></td>
-</form>
-</tr>
-</table>
+
 </body>
 </html>

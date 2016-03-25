@@ -18,15 +18,12 @@ class Follow
     public function FollowList() {
         $connect_db = new Database();
         $db = $connect_db->connect_db();
-        if (!isset($_SESSION)) {
-            session_start();
-        }
         $stmt = $db->prepare(
             'SELECT * FROM follows
             JOIN users ON follows.followed_user_id = users.user_id
             WHERE follows.user_id = ?'
         );
-        $stmt->execute(array($_SESSION['user_id']));
+        $stmt->execute([$_SESSION['user_id']]);
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $follows[] = $row;
         }
@@ -39,15 +36,12 @@ class Follow
     {
         $connect_db = new Database();
         $db = $connect_db->connect_db();
-        if (!isset($_SESSION)) {
-            session_start();
-        }
         $stmt = $db->prepare(
             'SELECT * FROM follows
             JOIN users ON follows.user_id = users.user_id
             WHERE followed_user_id = ?;'
         );
-        $stmt->execute(array($_SESSION['user_id']));
+        $stmt->execute([$_SESSION['user_id']]);
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $follows[] = $row;
         }
@@ -61,14 +55,11 @@ class Follow
         $user_id = $this->getFollowUserId();
         $connect_db = new Database();
         $db = $connect_db->connect_db();
-        if (!isset($_SESSION)) {
-            session_start();
-        }
         $insert = $db->prepare(
             'insert into follows
             (user_id,followed_user_id)
             VALUE(?,?)'
         );
-        $insert->execute(array($_SESSION['user_id'],$user_id));
+        $insert->execute([$_SESSION['user_id'],$user_id]);
     }
 }

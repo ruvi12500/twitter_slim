@@ -17,19 +17,18 @@ class Favorites
         return $this->DeleteId;
     }
 
-    public function Display()
+    public function display()
     {
         $connect_db = new Database();
         $db = $connect_db->connect_db();
-        if (!isset($_SESSION)) {
-            session_start();
-        }
-
         $stmt = $db->prepare(
-            'SELECT * FROM favorites
+            'SELECT tweets.*,users.user_name,images.id
+            FROM favorites
             JOIN tweets ON favorites.tweet_id = tweets.tweet_id
+            LEFT JOIN images ON favorites.tweet_id = images.tweet_id
             JOIN users ON tweets.user_id = users.user_id
-            WHERE favorites.user_id = ?'
+            WHERE favorites.user_id = ?
+            ORDER BY created_at DESC;'
         );
         $stmt->execute(array($_SESSION['user_id']));
         while ($result = $stmt->fetch(\PDO::FETCH_ASSOC)) {
@@ -40,14 +39,11 @@ class Favorites
         }
     }
 
-    public function Delete()
+    public function delete()
     {
         $FavoriteDeleteId = $this->getFavoriteDeleteId();
         $connect_db = new Database();
         $db = $connect_db->connect_db();
-        if (!isset($_SESSION)) {
-            session_start();
-        }
         if (isset($FavoriteDeleteId)) {
             $connect_db = new Database();
             $db= $connect_db->connect_db();

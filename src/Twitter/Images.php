@@ -5,30 +5,28 @@ namespace Twitter;
 class Images
 {
 
-    public function setImage($image)
+    public function setTweetId($tweetId)
     {
-        $this->image = $image;
+        $this->tweetId = ($tweetId);
         return $this;
     }
 
-    public function getImage()
+    public function getTweetId()
     {
-        return $this->image;
+        return $this->tweetId;
     }
 
-
-    public function Insert()
+    public function display()
     {
-        $Image = $this -> getImage();
-        if($Image != ""){
-            ob_start();
-            imagepng($Image, null, 9);
-            $ImageBinary = ob_get_clean();
+        $connect_db = new Database();
+        $db= $connect_db->connect_db();
+        $stmt = $db->prepare("SELECT * FROM images WHERE tweet_id = ?");
+        $stmt->execute([$this->getTweetId()]);
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $image[] = $row;
         }
-    }
-
-    public function Display()
-    {
-
+        if (!empty($image)) {
+            return $image;
+        }
     }
 }

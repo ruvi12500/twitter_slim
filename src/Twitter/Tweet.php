@@ -88,18 +88,29 @@ class Tweet extends AuthCheck
         return $this->TweetId;
     }
 
-    public function setTweetSerch($TweetSerch)
+    public function setTweetSearch($TweetSearch)
     {
-        $this->TweetSerch = ($TweetSerch);
+        $this->TweetSearch = ($TweetSearch);
         return $this;
     }
 
-    public function getTweetSerch()
+    public function getTweetSearch()
     {
-        return $this->TweetSerch;
+        return $this->TweetSearch;
     }
 
-    public function Display()
+    public function setMaxFileSize($maxFileSize)
+    {
+        $this->maxFileSize = ($maxFileSize);
+        return $this;
+    }
+
+    public function getMaxFileSize()
+    {
+        return $this->maxFileSize;
+    }
+
+    public function display()
     {
         $Tweeted = 0;
         $UserId = $_SESSION['user_id'];
@@ -108,9 +119,11 @@ class Tweet extends AuthCheck
         $stmt = $db->prepare(
             "SELECT
                 tweets.*,
-                users.user_name
+                users.user_name,
+                images.id
             FROM tweets
             LEFT JOIN follows ON tweets.user_id = followed_user_id
+            LEFT JOIN images ON tweets.tweet_id = images.tweet_id
             JOIN users ON tweets.user_id = users.user_id
             WHERE follows.user_id = ? OR tweets.user_id = ?
             UNION SELECT
@@ -120,15 +133,17 @@ class Tweet extends AuthCheck
                 tweets.delete_flag,
                 retweets.created_at,
                 retweets.updated_at,
-                users.user_name
+                users.user_name,
+                images.id
             FROM retweets
             LEFT JOIN tweets ON tweets.tweet_id = retweets.tweet_id
             LEFT JOIN follows ON retweets.user_id = follows.followed_user_id
+            LEFT JOIN images ON retweets.tweet_id = images.tweet_id
             JOIN users ON tweets.user_id = users.user_id
             WHERE retweets.user_id = ? OR follows.user_id = ?
             ORDER BY created_at desc"
         );
-        $stmt->execute(array($UserId,$UserId,$UserId,$UserId));
+        $stmt->execute([$UserId,$UserId,$UserId,$UserId]);
             while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
                 if ($row['delete_flag'] == $Tweeted) {
                     $array[] = $row;
@@ -139,28 +154,44 @@ class Tweet extends AuthCheck
         }
     }
 
-    public function Insert()
+    public function insert()
     {
         $TweetButton = $this->getTweetButton();
-        if (isset($TweetButton)) {
+        $maxFileSize = $this->getMaxFileSize();
+        if (
+            isset($TweetButton) &&
+            $_FILES['image']['size'] < $maxFileSize)
+        {
             $connect_db = new Database();
             $db = $connect_db->connect_db();
             $Tweeted = 0;
-            $query = array($_SESSION['user_id'],$this->getTweet(),$Tweeted);
+            $query = [$_SESSION['user_id'],$this->getTweet(),$Tweeted];
+
             $insert = $db->prepare(
                 "insert into tweets
                 (user_id,body,delete_flag)
                 VALUE(?,?,?)"
             );
             $insert->execute($query);
-            $Tweeted = ('tweeted');
-            return $Tweeted;
+            $tweetId = $db->lastInsertId('tweet_id');
+
+            if($_FILES['image']['tmp_name'] != ''){
+                $imageName = md5($_FILES['image']['name'])  ;
+                $image = file_get_contents($_FILES['image']['tmp_name']);
+                $imagequery = [$tweetId,$imageName,$image];
+                $insert = $db->prepare(
+                    'INSERT INTO images (tweet_id,name,data) VALUE(?,?,?)'
+                );
+                $insert->execute($imagequery);
+            }
+            return true;
         }
     }
 
-    public function Delete()
+    public function delete()
     {
         $TweetDeleteId = $this->getTweetDeleteId();
+
         if (isset($TweetDeleteId)) {
             $connect_db = new Database();
             $db= $connect_db->connect_db();
@@ -169,42 +200,44 @@ class Tweet extends AuthCheck
                 "UPDATE tweets set delete_flag = $Deleted
                 WHERE tweet_id = ? AND user_id = ?"
             );
-            $delete->execute(array($TweetDeleteId,$_SESSION['user_id']));
+            $delete->execute([$TweetDeleteId,$_SESSION['user_id']]);
         }
     }
 
-    public function Update()
+    public function update()
     {
         $TweetUpdate = $this->getTweetUpdate();
         $TweetUpdateId = $this->getTweetUpdateId();
+
         if (isset($TweetUpdate)) {
             $connect_db = new Database();
             $db = $connect_db->connect_db();
+
             $update = $db->prepare(
                 "UPDATE tweets SET body = ? WHERE tweet_id = ? AND user_id = ?"
             );
-            $update->execute(array(
+
+            $update->execute([
                 $TweetUpdate,
                 $TweetUpdateId,
                 $_SESSION['user_id']
-            ));
+            ]);
+
         }
     }
 
-    public function UpdateDisplay()
-    {
-
-    }
-
-    public function History()
+    public function history()
     {
         $connect_db = new Database();
         $db = $connect_db->connect_db();
         $stmt = $db->prepare(
-            'SELECT * FROM tweets
-            WHERE user_id = ?'
+            'SELECT tweets.*,images.id
+            FROM tweets
+            LEFT JOIN images ON tweets.tweet_id = images.tweet_id
+            WHERE user_id = ?
+            ORDER BY created_at DESC;'
         );
-        $stmt->execute(array($_SESSION['user_id']));
+        $stmt->execute([$_SESSION['user_id']]);
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             $history[] = $row;
         }
@@ -213,7 +246,7 @@ class Tweet extends AuthCheck
         }
     }
 
-    public function Favorite()
+    public function favorite()
     {
         $FavoriteId = $this->getTweetFavoriteId();
         $connect_db = new Database();
@@ -223,11 +256,11 @@ class Tweet extends AuthCheck
             (user_id,tweet_id)
             VALUE(?,?)"
         );
-        $insert->execute(array($_SESSION['user_id'],$FavoriteId));
+        $insert->execute([$_SESSION['user_id'],$FavoriteId]);
         return $this;
     }
 
-    public function Retweet()
+    public function retweet()
     {
         $RetweetId = $this->getRetweetId();
         $connect_db = new Database();
@@ -237,34 +270,33 @@ class Tweet extends AuthCheck
             (user_id,tweet_id)
             VALUE(?,?)"
         );
-        $insert->execute(array($_SESSION['user_id'],$RetweetId));
+        $insert->execute([$_SESSION['user_id'],$RetweetId]);
     }
 
-    public function Serch()
+    public function search()
     {
-        $TweetSerch = $this->getTweetSerch();
+        $TweetSearch = $this->getTweetSearch();
         $connect_db = new Database();
         $db = $connect_db->connect_db();
 
-        $Keyword = str_replace("　", " ", $TweetSerch);
+        $Keyword = str_replace("　", " ", $TweetSearch);
         $Keyword = trim($Keyword);
         $KeywordArray = preg_split("/[\s]+/",$Keyword);
+        $sql = 'SELECT tweets.*,users.user_name,images.id FROM tweets
+        JOIN users on tweets.user_id = users.user_id
+        LEFT JOIN images ON tweets.tweet_id = images.tweet_id';
+        $where = [];
+        $bind = [];
         foreach ($KeywordArray as $value) {
-            $sql = 'SELECT * FROM tweets
-            JOIN users on tweets.user_id = users.user_id';
-            $where = array();
-            $bind = array();
-            foreach ($KeywordArray as $value) {
-                $where[] = '(body LIKE ?)';
-                $bind[] = '%'.$value.'%';
-            }
-            $sql .= ' WHERE '
-                .implode('AND', $where)
-                .'AND delete_flag = 0 ORDER BY tweets.created_at desc';
-            $serch = $db -> prepare($sql);
-            $serch -> execute($bind);
+            $where[] = '(body LIKE ?)';
+            $bind[] = '%'.$value.'%';
         }
-        while ($row = $serch->fetch(\PDO::FETCH_ASSOC)) {
+        $sql .= ' WHERE '
+            .implode('AND', $where)
+            .'AND delete_flag = 0 ORDER BY tweets.created_at desc';
+        $search = $db -> prepare($sql);
+        $search -> execute($bind);
+        while ($row = $search->fetch(\PDO::FETCH_ASSOC)) {
             $array[] = $row;
         }
         if (!empty($array)) {
