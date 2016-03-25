@@ -7,9 +7,15 @@
 <body>
 <table>
 <tr>
-<form action="tweet/insert" method="post">
-    <td><input type="submit" value="ツイート"></td>
+<form action="tweet/insert" method="post" enctype="multipart/form-data">
+    <td><input type="text" name="tweet"></td>
+    <tr>
+    <td><input type="file" name="image"></td>
+    <input type="hidden" name="maxFileSize" value="65535" />
+    <td><input type="submit" name="TweetButton" value="ツイート"></td>
+    </tr>
 </form>
+<tr>
     <td><a href="history">ツイート履歴</a></td>
 </tr>
 <tr>
@@ -34,7 +40,9 @@
 <? if (!empty($Display))  { ?>
     <? foreach ($Display as $t) { ?>
         <tr><td>
-        <?= htmlspecialchars($t['body'],ENT_QUOTES) ?>
+        <a href="tweet/<?= $t['tweet_id'] ?>">
+            <?= htmlspecialchars($t['body'],ENT_QUOTES) ?>
+        </a>
         <?= htmlspecialchars($t['user_name'],ENT_QUOTES) ?>
         <?= $t['created_at'] ?>
         <? if ($_SESSION['user_id'] == $t['user_id']) { ?>

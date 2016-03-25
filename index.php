@@ -26,7 +26,7 @@ $app->post('/login', function () use ($app) {
     if ($status == 'login' OR $status == 'logged_in') {
         $app->redirect('/tweet');
     }
-    $app->render('login.php',array('status' => $status));
+    $app->render('login.php',['status' => $status]);
 });
 
 $app->post('/logout', function () use ($app) {
@@ -48,7 +48,11 @@ $app->get('/tweet', function () use ($app) {
         ->favorite()
         ->retweet();
     $Display = $TweetClass->display();
-    $app->render('tweet.php',array('Display' => $Display));
+    $app->render('tweet.php',['Display' => $Display]);
+});
+
+$apxp->get('/tweet/:id', function ($id) use ($app) {
+
 });
 
 $app->post('/images/', function () use ($app) {
@@ -79,7 +83,6 @@ $app->post('/tweet/insert', function () use ($app) {
         -> setMaxFileSize($maxFileSize)
         -> setTweetButton($TweetButton);
     $Tweeted = $TweetClass->insert();
-    $app->render('tweet_insert.php');
 
     if ($Tweeted == true) {
         $app->redirect('/tweet');
