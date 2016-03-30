@@ -7,6 +7,11 @@
 <body>
 
 <form action="" method="post">
+<? if (!empty($display)) { ?>
+    <? foreach ($display as $t) { ?>
+     <?= htmlspecialchars($t['body'],ENT_QUOTES) ?><br>
+    <? } ?>
+<? } ?>
 <input type="text" name="update">
 <input type="submit" value = "確定">
 <br>

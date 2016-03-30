@@ -9,7 +9,9 @@
 <? if(!empty($follows)){ ?>
     <? foreach ($follows as $f) { ?>
             <tr><td>
-            <?= htmlspecialchars($f['user_name'],ENT_QUOTES) ?>
+            <a href="users/<?= $f['user_name'] ?>">
+                <?= htmlspecialchars($f['user_name'],ENT_QUOTES) ?>
+            </a>
             </td></tr>
     <? } ?>
 <? } ?>

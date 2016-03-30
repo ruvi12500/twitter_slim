@@ -18,7 +18,8 @@ class Database
                 $this->dbpass
             );
         }catch(PDOException $e){
-            $e->getMessage();
+            $log = $e->getMessage();
+            $log -> setWriter(new \My\LogWriter());
         }
         return $db_connection;
     }

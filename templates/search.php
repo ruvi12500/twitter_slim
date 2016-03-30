@@ -16,11 +16,10 @@
             <a href="follow/<?= $s['user_id'] ?>">フォローする</a>
         <? } ?>
         </td></tr>
-
         <tr><td>
-        <? if (!empty($s['id'])) { ?>
-            <a href = "images/<?= $s['tweet_id']?>">
-                <img src="http://local-twitter-slim.jp/images/<?= $s['tweet_id']?>" >
+        <? if (!empty($s['name'])) { ?>
+            <a href = "http://local-twitter-slim.jp/images/<?= $s['name']?>">
+                <img src="http://local-twitter-slim.jp/images/<?= $s['name']?>" >
             </a>
         <? } ?>
         </td></tr>

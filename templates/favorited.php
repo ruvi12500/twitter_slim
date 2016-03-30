@@ -16,8 +16,8 @@
             </td></tr>
         <tr><td>
         <? if(!empty($list['id'])){ ?>
-            <a href="/images/<?= $list['tweet_id'] ?>">
-                <img src="http://local-twitter-slim.jp/images/<?= $list['tweet_id'] ?>">
+            <a href="/images/<?= $list['name'] ?>">
+                <img src="http://local-twitter-slim.jp/images/<?= $list['name'] ?>">
             </a>
         <? } ?>
         </td></tr>

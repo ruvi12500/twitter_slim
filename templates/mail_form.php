@@ -9,7 +9,6 @@
 <table>
 <tr>
 <? if ($status == 'ok') { ?>
-<form action="registration/<?= $_SESSION['UniqUserId'] ?>" method="post">
     <p>メールを送信しました。</p>
 <? } elseif ($status == 'failed') { ?>
     <p>既に登録されています。</p>

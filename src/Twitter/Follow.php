@@ -39,7 +39,7 @@ class Follow
         $stmt = $db->prepare(
             'SELECT * FROM follows
             JOIN users ON follows.user_id = users.user_id
-            WHERE followed_user_id = ?;'
+            WHERE followed_user_id = ?'
         );
         $stmt->execute([$_SESSION['user_id']]);
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {

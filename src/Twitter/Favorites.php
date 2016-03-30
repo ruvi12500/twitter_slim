@@ -21,8 +21,9 @@ class Favorites
     {
         $connect_db = new Database();
         $db = $connect_db->connect_db();
+        $Tweeted = 0;
         $stmt = $db->prepare(
-            'SELECT tweets.*,users.user_name,images.id
+            'SELECT tweets.*,users.user_name,images.name
             FROM favorites
             JOIN tweets ON favorites.tweet_id = tweets.tweet_id
             LEFT JOIN images ON favorites.tweet_id = images.tweet_id
@@ -32,7 +33,9 @@ class Favorites
         );
         $stmt->execute(array($_SESSION['user_id']));
         while ($result = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            if ($result['delete_flag'] == $Tweeted) {
                 $favorites[] = $result;
+            }
         }
         if(!empty($favorites)){
             return $favorites;

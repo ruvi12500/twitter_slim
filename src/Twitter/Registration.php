@@ -72,7 +72,7 @@ class Registration
             $db = $connect_db->connect_db();
 
             $stmt = $db->prepare(
-                "SELECT * FROM users WHERE mail_address = ?"
+                'SELECT * FROM users WHERE mail_address = ?'
             );
 
             $stmt->execute([$MailAddress]);
@@ -82,13 +82,13 @@ class Registration
 
             if($stmt->rowCount() == 0){
                 $this->setStatus('ok');
-                mb_language("japanese");
-                mb_internal_encoding("utf-8");
+                mb_language('japanese');
+                mb_internal_encoding('utf-8');
                 $to = $MailAddress;
-                $subject = "テストメール";
-                $message = "以下のURLより会員登録してください。\n".
-                "http://local-twitter-slim.jp/registration/$UniqUserId";
-                $header = "From:test@test.com";
+                $subject = 'テストメール';
+                $message = '以下のURLより会員登録してください。\n'.
+                'http://local-twitter-slim.jp/registration/$UniqUserId';
+                $header = 'From:test@test.com';
                 mail($to, $subject, $message, $header);
             } else {
                 $this->setStatus('failed');
@@ -118,9 +118,9 @@ class Registration
             $db = $connect_db->connect_db();
 
             $insert = $db->prepare(
-                "insert into users
+                'insert into users
                 (mail_address,user_password,user_name)
-                VALUE(?,?,?)"
+                VALUE(?,?,?)'
             );
 
             if ($insert->execute($query)) {
