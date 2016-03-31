@@ -4,10 +4,10 @@ namespace Twitter;
 
 class Database
 {
-    private $dbhost="localhost";
-    private $dbuser="takumi_asai";
-    private $dbpass="asataku";
-    private $dbname="twitter";
+    private $dbhost= "localhost";
+    private $dbuser= "takumi_asai";
+    private $dbpass= "asataku";
+    private $dbname= "twitter";
 
     public function connect_db()
     {

@@ -143,13 +143,13 @@ class Tweet extends AuthCheck
             WHERE retweets.user_id = ? OR follows.user_id = ?
             ORDER BY created_at desc'
         );
-        $stmt->execute([$UserId,$UserId,$UserId,$UserId]);
+        $stmt->execute([$UserId, $UserId, $UserId, $UserId]);
 
-            while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                if ($row['delete_flag'] == $this->Tweeted) {
-                    $array[] = $row;
-                }
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            if ($row['delete_flag'] == $this->Tweeted) {
+                $array[] = $row;
             }
+        }
 
         if (!empty($array)) {
             return $array;
@@ -166,7 +166,7 @@ class Tweet extends AuthCheck
         ){
             $connect_db = new Database();
             $db = $connect_db->connect_db();
-            $query = [$_SESSION['user_id'],$this->getTweet(),$this->Tweeted];
+            $query = [$_SESSION['user_id'], $this->getTweet(), $this->Tweeted];
 
             $insert = $db->prepare(
                 'INSERT INTO tweets
@@ -179,27 +179,35 @@ class Tweet extends AuthCheck
             if ($_FILES['image']['tmp_name'] != '') {
                 $imageName = md5(uniqid(rand(100,999)));
                 $image = file_get_contents($_FILES['image']['tmp_name']);
-                $imagequery = [$tweetId,$imageName,$image];
+                $imagequery = [$tweetId, $imageName, $image];
                 $insert = $db->prepare(
                     'INSERT INTO images (tweet_id,name,data) VALUES(?,?,?)'
                 );
                 $insert->execute($imagequery);
             }
 
-            if (preg_match('/(#[a-z0-9A-Z]+\s*)+/',$this->getTweet(),$hashTag)) {
+            if (
+                preg_match(
+                '/(#[a-z0-9A-Z]+\s*)+/',
+                $this->getTweet(),
+                $hashTag
+                )
+            ) {
                 $keywords = preg_split(
                     '/[\s]+/',
                     trim(str_replace('　', ' ', reset($hashTag)))
                 );
                 $sql ='INSERT INTO tags (tweet_id,hash_tag)';
+
                 foreach ($keywords as $keyword) {
                     $values[] = '(?,?)';
                     $bind[] = $tweetId;
                     $bind[] = $keyword;
                 }
+
                 $sql .= ' VALUES '
                     . implode(',', $values);
-                $insert = $db->prepare($sql);
+                $insert = $db -> prepare($sql);
                 $insert -> execute($bind);
             }
         }
@@ -211,20 +219,20 @@ class Tweet extends AuthCheck
 
         if (isset($TweetDeleteId)) {
             $connect_db = new Database();
-            $db= $connect_db->connect_db();
+            $db = $connect_db->connect_db();
             $Deleted = 1;
             $delete = $db->prepare(
-                'UPDATE tweets set delete_flag = $Deleted
-                WHERE tweet_id = ? AND user_id = ?'
+                "UPDATE tweets set delete_flag = $Deleted
+                WHERE tweet_id = ? AND user_id = ?"
             );
-            $delete->execute([$TweetDeleteId,$_SESSION['user_id']]);
+            $delete -> execute([$TweetDeleteId, $_SESSION['user_id']]);
         }
     }
 
     public function update()
     {
-        $TweetUpdate = $this->getTweetUpdate();
-        $TweetUpdateId = $this->getTweetUpdateId();
+        $TweetUpdate = $this -> getTweetUpdate();
+        $TweetUpdateId = $this -> getTweetUpdateId();
 
         if (isset($TweetUpdate)) {
             $connect_db = new Database();
@@ -245,11 +253,11 @@ class Tweet extends AuthCheck
 
     public function updateDisplay()
     {
-        $TweetUpdateId = $this->getTweetUpdateId();
+        $TweetUpdateId = $this -> getTweetUpdateId();
         $connect_db = new Database();
-        $db = $connect_db->connect_db();
+        $db = $connect_db -> connect_db();
 
-        $update = $db->prepare(
+        $update = $db -> prepare(
             'SELECT * FROM tweets WHERE tweet_id = ? AND user_id = ?'
         );
 
@@ -258,7 +266,7 @@ class Tweet extends AuthCheck
             $_SESSION['user_id']
         ]);
 
-        while ($row = $update->fetch(\PDO::FETCH_ASSOC)) {
+        while ($row = $update -> fetch(\PDO::FETCH_ASSOC)) {
             $array[] = $row;
         }
 
@@ -269,15 +277,15 @@ class Tweet extends AuthCheck
 
     public function favorite()
     {
-        $FavoriteId = $this->getTweetFavoriteId();
+        $FavoriteId = $this -> getTweetFavoriteId();
         $connect_db = new Database();
-        $db = $connect_db->connect_db();
-        $insert = $db->prepare(
+        $db = $connect_db -> connect_db();
+        $insert = $db -> prepare(
             'INSERT INTO favorites
             (user_id,tweet_id)
             VALUES(?,?)'
         );
-        $insert->execute([$_SESSION['user_id'],$FavoriteId]);
+        $insert -> execute([$_SESSION['user_id'], $FavoriteId]);
         return $this;
     }
 
@@ -291,20 +299,20 @@ class Tweet extends AuthCheck
             (user_id,tweet_id)
             VALUES(?,?)'
         );
-        $insert->execute([$_SESSION['user_id'],$RetweetId]);
+        $insert->execute([$_SESSION['user_id'], $RetweetId]);
     }
 
     public function search()
     {
-        $TweetSearch = $this->getTweetSearch();
+        $TweetSearch = $this -> getTweetSearch();
         $connect_db = new Database();
-        $db = $connect_db->connect_db();
+        $db = $connect_db -> connect_db();
 
-        if (preg_match('/(#[a-z-0-9A-Z]+\s*)+/',$TweetSearch,$hashTag)) {
+        if (preg_match('/(#[a-z-0-9A-Z]+\s*)+/', $TweetSearch, $hashTag)) {
 
             $Keyword = str_replace('　', ' ', $hashTag[0]);
             $Keyword = trim($Keyword);
-            $KeywordArray = preg_split('/[\s]+/',$Keyword);
+            $Keywords = preg_split('/[\s]+/', $Keyword);
             $sql =
                 'SELECT * FROM tags
                 JOIN tweets ON tags.tweet_id = tweets.tweet_id
@@ -313,7 +321,7 @@ class Tweet extends AuthCheck
             $where = [];
             $bind = [];
 
-            foreach ($KeywordArray as $value) {
+            foreach ($Keywords as $value) {
                 $where[] = '(hash_tag = ?)';
                 $bind[] = $value;
             }
@@ -326,7 +334,7 @@ class Tweet extends AuthCheck
         } else {
             $Keyword = str_replace('　', ' ', $TweetSearch);
             $Keyword = trim($Keyword);
-            $KeywordArray = preg_split('/[\s]+/',$Keyword);
+            $KeywordArray = preg_split('/[\s]+/', $Keyword);
             $sql =
                 'SELECT tweets.*,users.user_name,images.name FROM tweets
                 JOIN users on tweets.user_id = users.user_id
@@ -340,11 +348,11 @@ class Tweet extends AuthCheck
             }
 
             $sql .= ' WHERE '
-                .implode('OR', $where)
-                .'AND delete_flag = 0 ORDER BY tweets.created_at desc';
+                 .implode('OR', $where)
+                 .'AND delete_flag = 0 ORDER BY tweets.created_at desc';
             $search = $db -> prepare($sql);
             $search -> execute($bind);
-        }
+            }
 
         while ($row = $search->fetch(\PDO::FETCH_ASSOC)) {
             if ($row['delete_flag'] == $this->Tweeted) {
@@ -360,14 +368,14 @@ class Tweet extends AuthCheck
     public function Detail($id)
     {
         $connect_db = new Database();
-        $db= $connect_db->connect_db();
-        $stmt = $db->prepare(
+        $db= $connect_db -> connect_db();
+        $stmt = $db -> prepare(
             'SELECT tweets.*,users.user_name,images.name FROM tweets
             LEFT JOIN images ON tweets.tweet_id = images.tweet_id
             JOIN users ON tweets.user_id = users.user_id
             WHERE tweets.tweet_id = ?'
         );
-        $stmt->execute([$id]);
+        $stmt -> execute([$id]);
 
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
             if ($row['delete_flag'] == $this->Tweeted) {

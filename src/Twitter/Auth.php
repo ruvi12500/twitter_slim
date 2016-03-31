@@ -6,7 +6,7 @@ class Auth
 {
     private $mailaddress = null;
     private $password = null;
-    private $Logged_in = false;
+    private $LoggedIn = false;
 
     public function setMailAddress($mailaddress)
     {
@@ -39,7 +39,7 @@ class Auth
         $db = $connect_db->connect_db();
 
         if (isset($_SESSION['user_id'])) {
-            return $Logged_in = true;
+            return $loggedIn = true;
         } elseif (!empty($mailaddress) OR !empty($password)) {
             $passwordMd5 = md5($password . $salt);
 
@@ -53,9 +53,9 @@ class Auth
             if ($stmt->rowCount() == 1) {
                 $_SESSION['user_id'] = $result['user_id'];
                  $_SESSION['user_name'] = $result['user_name'];
-                return $Logged_in = true;
+                return $loggedIn = true;
             } else {
-                return $Logged_in = false;
+                return $loggedIn = false;
             }
         }
     }

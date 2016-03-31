@@ -51,9 +51,9 @@ class Favorites
             $connect_db = new Database();
             $db= $connect_db->connect_db();
             $delete = $db->prepare(
-                "DELETE FROM favorites WHERE tweet_id = ? AND user_id = ?"
+                'DELETE FROM favorites WHERE tweet_id = ? AND user_id = ?'
             );
-            $delete->execute(array($FavoriteDeleteId,$_SESSION['user_id']));
+            $delete->execute([$FavoriteDeleteId, $_SESSION['user_id']]);
         }
     }
 }

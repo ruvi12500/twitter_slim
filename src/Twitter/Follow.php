@@ -60,6 +60,6 @@ class Follow
             (user_id,followed_user_id)
             VALUE(?,?)'
         );
-        $insert->execute([$_SESSION['user_id'],$user_id]);
+        $insert->execute([$_SESSION['user_id'], $user_id]);
     }
 }

@@ -22,10 +22,10 @@ $app->post('/login', function () use ($app) {
     $password = $app->request->post('password');
     $LoginClass
         ->setMailAddress($mailaddress)
-        ->setPassWord($password);
-    $status = $LoginClass->login();
+        ->setPassWord($password)
+        ->login();
 
-    if ($status) {
+    if ($loggedIn) {
         $app->redirect('/tweet');
     }
 
@@ -52,8 +52,8 @@ $app->get('/tweet', function () use ($app) {
         ->setReTweetId($ReTweetId)
         ->favorite()
         ->retweet();
-    $Display = $TweetClass->display();
-    $app->render('tweet.php',['Display' => $Display]);
+    $display = $TweetClass->display();
+    $app->render('tweet.php',['display' => $display]);
 });
 
 $app->get('/tweet/:id', function ($id) use ($app) {

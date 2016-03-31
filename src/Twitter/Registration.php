@@ -112,7 +112,8 @@ class Registration
             $UserPassWordMd5 = md5($UserPassWord . $salt);
             $query = [
                 $_SESSION['MailAddress'],
-                $UserPassWordMd5,$UserName
+                $UserPassWordMd5,
+                $UserName
             ];
             $connect_db = new Database();
             $db = $connect_db->connect_db();
